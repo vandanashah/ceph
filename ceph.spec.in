@@ -143,13 +143,11 @@ Summary:	Ceph Common
 Group:		System Environment/Base
 Requires:	librbd1 = %{epoch}:%{version}-%{release}
 Requires:	librados2 = %{epoch}:%{version}-%{release}
+Requires:	python-argparse
 Requires:	python-rados = %{epoch}:%{version}-%{release}
 Requires:	python-rbd = %{epoch}:%{version}-%{release}
 Requires:	python-cephfs = %{epoch}:%{version}-%{release}
 Requires:	python-requests
-%if 0%{defined suse_version}
-Requires:  python-argparse
-%endif
 %if 0%{?rhel} || 0%{?fedora}
 Requires:	redhat-lsb-core
 %endif
