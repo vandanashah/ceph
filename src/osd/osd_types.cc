@@ -946,8 +946,8 @@ int pg_pool_t::calc_bits_of(int t)
 
 void pg_pool_t::calc_pg_masks()
 {
-  pg_num_mask = (1 << calc_bits_of(pg_num-1)) - 1;
-  pgp_num_mask = (1 << calc_bits_of(pgp_num-1)) - 1;
+	pg_num_mask = ceph_calc_mask(object_hash, pg_num);
+	pgp_num_mask = ceph_calc_mask(object_hash, pgp_num);
 }
 
 unsigned pg_pool_t::get_pg_num_divisor(pg_t pgid) const

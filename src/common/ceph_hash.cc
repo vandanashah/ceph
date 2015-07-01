@@ -1,5 +1,6 @@
 
 #include "include/types.h"
+#include <stdlib.h>
 
 /*
  * Robert Jenkin's hash function.
@@ -91,6 +92,17 @@ unsigned ceph_str_hash_linux(const char *str, unsigned length)
 	return hash;
 }
 
+unsigned ceph_str_hash_direct(const char *s, unsigned len)
+{
+#define NUM_PG_BITS (1)
+#define PG_START_BIT (18)
+#define PG_BIT_MASK ((1ULL << NUM_PG_BITS -1) << PG_START_BIT)
+	unsigned long hash = 0, val;
+	hash = strtoull(s, NULL, 10); 
+	val = hash & PG_BIT_MASK;
+	val = val >> PG_START_BIT;
+	return (unsigned) val;
+}
 
 unsigned ceph_str_hash(int type, const char *s, unsigned len)
 {
@@ -99,6 +111,8 @@ unsigned ceph_str_hash(int type, const char *s, unsigned len)
 		return ceph_str_hash_linux(s, len);
 	case CEPH_STR_HASH_RJENKINS:
 		return ceph_str_hash_rjenkins(s, len);
+	case CEPH_STR_HASH_DIRECT:
+		return ceph_str_hash_direct(s, len);
 	default:
 		return -1;
 	}
@@ -111,7 +125,35 @@ const char *ceph_str_hash_name(int type)
 		return "linux";
 	case CEPH_STR_HASH_RJENKINS:
 		return "rjenkins";
+	case CEPH_STR_HASH_DIRECT:
+		return "direct";
 	default:
 		return "unknown";
 	}
 }
+
+
+int calc_bits_of(int t)
+{
+  int b = 0;
+  while (t > 0) {
+    t = t >> 1;
+    ++b;
+  }
+  return b;
+}
+
+unsigned ceph_calc_mask(int type, unsigned num)
+{
+
+	switch (type) {
+	case CEPH_STR_HASH_DIRECT:
+		return -1; /* ((1 << 32) -1) */
+	case CEPH_STR_HASH_LINUX:
+	case CEPH_STR_HASH_RJENKINS:
+		return ((1 << calc_bits_of(num-1)) - 1); 
+	default: /* ??? */
+		return -1;
+	}
+}
+
